@@ -2,14 +2,24 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.hardkernel.odroid"
     android:versionCode="1"
-    android:versionName="1.0" >
+    android:versionName="1.0"
+    coreApp="true"
+    android:sharedUserId="android.uid.system" >
+
+    <original-package android:name="com.hardkernel.odroid" />
+
 
     <uses-sdk
-        android:minSdkVersion="15"
-        android:targetSdkVersion="16" />
+        android:minSdkVersion="24"
+        android:targetSdkVersion="25" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE" />
+    <uses-permission android:name="android.permission.REBOOT" />
+    <uses-permission android:name="android.permission.ACCESS_SUPERUSER"/>
+
 
     <application
         android:allowBackup="true"

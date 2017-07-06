@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Wi-Fi IP settings. -->
+    <!-- Note that adding/removing/moving the items will need ethernet settings code change. -->
+    <string-array name="ethernet_ip_settings">
+        <!-- Use DHCP (Dynamic Host Configuration Protocol) for obtaining IP settings [CHAR LIMIT=25] -->
+        <item>DHCP</item>
+        <!-- Use statically defined IP settings [CHAR LIMIT=25]-->
+        <item>Static</item>
+    </string-array>
+
+</resources>

@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 16
-    buildToolsVersion "22.0.1"
+    compileSdkVersion 25
+    buildToolsVersion "25.0.1"
 
     defaultConfig {
         applicationId "com.hardkernel.odroid"
-        minSdkVersion 15
-        targetSdkVersion 16
+        minSdkVersion 24
+        targetSdkVersion 25
     }
 
     buildTypes {
