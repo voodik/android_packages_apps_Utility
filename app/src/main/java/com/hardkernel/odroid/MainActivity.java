@@ -91,6 +91,7 @@ public class MainActivity extends Activity {
     private final static String FORCE_HDMI_AUDIO_PROP = "persist.hdmi.audioforce";
     private final static String FORCE_HDMI_INPUT_PROP = "persist.hdmi.switch_tv_input";
     private final static String ADB_OVER_NET_PROP = "persist.adb.tcp.port";
+    private final static String WLAN_NO_PS_PROP = "persist.no_wlan_ps";
 
     private static final int DHCP = 0;
     private static final int STATIC_IP = 1;
@@ -166,6 +167,7 @@ public class MainActivity extends Activity {
     private Switch mHdmiAudioSwitch;
     private Switch mHdmiInputSwitch;
     private Switch mADBonSwitch;
+    private Switch mWlanNoPsSwitch;
 
     private Process mSu;
 
@@ -833,6 +835,8 @@ public class MainActivity extends Activity {
         mHdmiInputSwitch.setChecked(SystemProperties.getBoolean(FORCE_HDMI_INPUT_PROP, true));
         mADBonSwitch = (Switch) findViewById(R.id.switch_adb_on);
         mADBonSwitch.setChecked((SystemProperties.getInt(ADB_OVER_NET_PROP, 0) > 0));
+        mWlanNoPsSwitch = (Switch) findViewById(R.id.switch_wlan_no_ps);
+        mWlanNoPsSwitch.setChecked(SystemProperties.getBoolean(WLAN_NO_PS_PROP, false));
 
         mBtSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
@@ -903,6 +907,18 @@ public class MainActivity extends Activity {
                     SystemProperties.set(ADB_OVER_NET_PROP, "5555");
                 }else{
                     SystemProperties.set(ADB_OVER_NET_PROP, "0");
+                }
+            }
+        });
+        mWlanNoPsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView,
+                                         boolean isChecked) {
+                if(isChecked){
+                    SystemProperties.set(WLAN_NO_PS_PROP, "true");
+                }else{
+                    SystemProperties.set(WLAN_NO_PS_PROP, "false");
                 }
             }
         });

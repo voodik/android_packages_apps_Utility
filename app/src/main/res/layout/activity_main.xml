@@ -250,6 +250,14 @@
                         android:layout_marginTop="22dp"
                         android:text="@string/enable_adb_ower_network_at_boot"
                         android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                    <Switch
+                        android:id="@+id/switch_wlan_no_ps"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="22dp"
+                        android:text="@string/disable_wlan_ps"
+                        android:textAppearance="?android:attr/textAppearanceMedium" />
                 </LinearLayout>
 
                <LinearLayout
