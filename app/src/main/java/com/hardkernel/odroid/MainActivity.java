@@ -92,6 +92,9 @@ public class MainActivity extends Activity {
     private final static String FORCE_HDMI_INPUT_PROP = "persist.hdmi.switch_tv_input";
     private final static String ADB_OVER_NET_PROP = "persist.adb.tcp.port";
     private final static String WLAN_NO_PS_PROP = "persist.no_wlan_ps";
+    private final static String HDMI_ORIENTATION_PROP = "persist.demo.hdmirotation";
+    private final static String SF_ROTATION_PROP = "ro.sf.hwrotation";
+
 
     private static final int DHCP = 0;
     private static final int STATIC_IP = 1;
@@ -111,22 +114,20 @@ public class MainActivity extends Activity {
     private Spinner mSpinner_Resolution;
     private String mResolution = "720p60hz";
 
-    private RadioButton mRadio_portrait;
-    private RadioButton mRadio_landscape;
 
+    private RadioButton mRadio_0;
     private RadioButton mRadio_90;
+    private RadioButton mRadio_180;
     private RadioButton mRadio_270;
 
     private RadioGroup mRG_resolution;
     private RadioGroup mRG_phy;
-    private RadioGroup mRG_degree;
 
     private Spinner shortcut_f7;
     private Spinner shortcut_f8;
     private Spinner shortcut_f9;
     private Spinner shortcut_f10;
 
-    private String mOrientation;
     private int mDegree;
 
     private static Context context;
@@ -168,8 +169,12 @@ public class MainActivity extends Activity {
     private Switch mHdmiInputSwitch;
     private Switch mADBonSwitch;
     private Switch mWlanNoPsSwitch;
+    private Boolean mDisablevu7 = false;
+    private Boolean mTouchInvertX = false;
+    private Boolean mTouchInvertY = false;
+    private int mEDID = 0;
+    private int mHPD = 1;
 
-    private Process mSu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -181,51 +186,7 @@ public class MainActivity extends Activity {
         mRadio_left = (RadioButton)findViewById(R.id.radio_left);
         mRadio_right = (RadioButton)findViewById(R.id.radio_right);
 
-        InputStream inputstream = null;
-        try {
-            inputstream = Runtime.getRuntime().exec("getprop")
-                    .getInputStream();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        BufferedReader bufferedReader = new BufferedReader(
-                  new InputStreamReader(inputstream));
-
-        mOrientation = "landscape";
-        mDegree = 0;
-
         String line;
-        try {
-            while ((line = bufferedReader.readLine()) != null) {
-                if (line.contains("mouse.firstbutton")) {
-                    if (line.contains("right")) {
-                        mRadio_right.toggle();
-                        Log.e(TAG, "right");
-                    } else if (line.contains("left")) {
-                        mRadio_left.toggle();
-                        Log.e(TAG, "left");
-                    }
-                }
-                if (line.contains("persist.demo.hdmirotation")) {
-                    if (line.contains("portrait")) {
-                        Log.e(TAG, line);
-                        mOrientation = "portrait";
-                    }
-                }
-                if (line.contains("ro.sf.hwrotation")) {
-                    if (line.contains("90"))
-                        mDegree = 90;
-                    else if (line.contains("270"))
-                        mDegree = 270;
-                    else if (line.contains("0"))
-                        mDegree = 0;
-                }
-            }
-            bufferedReader.close();
-        } catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
 
         TabHost tabHost = (TabHost)findViewById(android.R.id.tabhost);
         tabHost.setup();
@@ -387,10 +348,39 @@ public class MainActivity extends Activity {
         File boot_ini = new File(BOOT_INI);
         if (boot_ini.exists()) {
             try {
-                bufferedReader = new BufferedReader(new FileReader(BOOT_INI));
+                BufferedReader bufferedReader = new BufferedReader(new FileReader(BOOT_INI));
                 while ((line = bufferedReader.readLine()) != null) {
                     if (line.contains("bootargs"))
                         break;
+
+                    if (line.startsWith("setenv disable_vu7")){
+                        if (line.contains("true")) {
+                            mDisablevu7 = true;
+                        }
+                    }
+
+                    if (line.startsWith("setenv touch_invert_x")){
+                        if (line.contains("true")) {
+                            mTouchInvertX = true;
+                        }
+                    }
+
+                    if (line.startsWith("setenv touch_invert_y")){
+                        if (line.contains("true")) {
+                            mTouchInvertY = true;
+                        }
+                    }
+                    if (line.startsWith("setenv edid")){
+                        if (line.contains("1")) {
+                            mEDID = 1;
+                        }
+                    }
+
+                    if (line.startsWith("setenv hpd")){
+                        if (line.contains("0")) {
+                            mHPD = 0;
+                        }
+                    }
 
                     if (line.contains("hdmi_phy_res") && line.indexOf("#") < 0) {
                         Log.e(TAG, line);
@@ -480,47 +470,45 @@ public class MainActivity extends Activity {
 
         });
 
-        mRadio_portrait = (RadioButton)findViewById(R.id.radio_portrait);
-        mRadio_landscape = (RadioButton)findViewById(R.id.radio_landscape);
+        mDegree = SystemProperties.getInt(SF_ROTATION_PROP, 0);
+
+        mRadio_0 = (RadioButton)findViewById(R.id.radio_0);
         mRadio_90 = (RadioButton)findViewById(R.id.radio_90);
+        mRadio_180 = (RadioButton)findViewById(R.id.radio_180);
         mRadio_270 = (RadioButton)findViewById(R.id.radio_270);
-        mRG_degree = (RadioGroup)findViewById(R.id.radioGroup_degree);
-        if (mOrientation.equals("landscape")) {
-           mRadio_landscape.setChecked(true);
-           mRG_degree.setVisibility(View.GONE);
-           mDegree = 0;
-        } else {
-           mRadio_portrait.setChecked(true);
-           mRG_degree.setVisibility(View.VISIBLE);
-        }
 
-        if (mDegree == 90) {
-            mRadio_90.setChecked(true);
-            mRadio_270.setChecked(false);
-        } else {
-            mRadio_90.setChecked(false);
-            mRadio_270.setChecked(true);
-        }
-
-        mRadio_portrait.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                mRG_degree.setVisibility(View.VISIBLE);
-                mDegree = 270;
+        switch (mDegree) {
+            case 90:
+                mRadio_0.setChecked(false);
+                mRadio_90.setChecked(true);
+                mRadio_180.setChecked(false);
+                mRadio_270.setChecked(false);
+                break;
+            case 180:
+                mRadio_0.setChecked(false);
                 mRadio_90.setChecked(false);
+                mRadio_180.setChecked(true);
+                mRadio_270.setChecked(false);
+                break;
+            case 270:
+                mRadio_0.setChecked(false);
+                mRadio_90.setChecked(false);
+                mRadio_180.setChecked(false);
                 mRadio_270.setChecked(true);
-            }
+                break;
+            default:
+                mRadio_0.setChecked(true);
+                mRadio_90.setChecked(false);
+                mRadio_180.setChecked(false);
+                mRadio_270.setChecked(false);
+                break;
+        }
 
-        });
-
-        mRadio_landscape.setOnClickListener(new OnClickListener() {
+        mRadio_0.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View v) {
                 // TODO Auto-generated method stub
-                mRG_degree.setVisibility(View.GONE);
                 mDegree = 0;
             }
 
@@ -532,6 +520,16 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 // TODO Auto-generated method stub
                 mDegree = 90;
+            }
+
+        });
+
+        mRadio_180.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+                mDegree = 180;
             }
 
         });
@@ -553,49 +551,11 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 // TODO Auto-generated method stub
-                try {
-                    mSu = Runtime.getRuntime().exec("su");
-                } catch (Exception e) {
-                }
-
-                try {
-                    DataOutputStream stdin = new DataOutputStream(mSu.getOutputStream());
-                    stdin.writeBytes("mount -o rw,remount /system\n");
-
-                    if (mRadio_portrait.isChecked()) {
-                        stdin.writeBytes("sed -i s/persist.demo.hdmirotation=landscape/persist.demo.hdmirotation=portrait/g /system/build.prop\n");
-                        if (mDegree == 90) {
-                            stdin.writeBytes("sed -i s/ro.sf.hwrotation=0/ro.sf.hwrotation=90/g /system/build.prop\n");
-                            stdin.writeBytes("sed -i s/ro.sf.hwrotation=270/ro.sf.hwrotation=90/g /system/build.prop\n");
-                        } else {
-                            stdin.writeBytes("sed -i s/ro.sf.hwrotation=0/ro.sf.hwrotation=270/g /system/build.prop\n");
-                            stdin.writeBytes("sed -i s/ro.sf.hwrotation=90/ro.sf.hwrotation=270/g /system/build.prop\n");
-                        }
-                    } else if (mRadio_landscape.isChecked()) {
-                        stdin.writeBytes("sed -i s/persist.demo.hdmirotation=portrait/persist.demo.hdmirotation=landscape/g /system/build.prop\n");
-                        stdin.writeBytes("sed -i s/ro.sf.hwrotation=90/ro.sf.hwrotation=0/g /system/build.prop\n");
-                        stdin.writeBytes("sed -i s/ro.sf.hwrotation=270/ro.sf.hwrotation=0/g /system/build.prop\n");
-                    }
-
-                    stdin.writeBytes("mount -o ro,remount /system\n");
-                    if (mDegree == 0) {
-                        android.provider.Settings.System.putInt(getContentResolver(), Settings.System.ACCELEROMETER_ROTATION, 0);
-                        android.provider.Settings.System.putInt(getContentResolver(), Settings.System.USER_ROTATION, 0);
-                    } else if (mDegree == 90) {
-                        android.provider.Settings.System.putInt(getContentResolver(), Settings.System.ACCELEROMETER_ROTATION, 0);
-                        android.provider.Settings.System.putInt(getContentResolver(), Settings.System.USER_ROTATION, 1);
-                    } else if (mDegree == 270) {
-                        android.provider.Settings.System.putInt(getContentResolver(), Settings.System.ACCELEROMETER_ROTATION, 0);
-                        android.provider.Settings.System.putInt(getContentResolver(), Settings.System.USER_ROTATION, 3);
-                    }
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-
+                android.provider.Settings.System.putInt(getContentResolver(), Settings.System.USER_ROTATION, 0);
+                android.provider.Settings.System.putInt(getContentResolver(), Settings.System.ACCELEROMETER_ROTATION, 0);
                 saveBootIni();
+                reboot();
             }
-
         });
 //        shortcutActivity();
 
@@ -1284,14 +1244,22 @@ public class MainActivity extends Activity {
             writer.println("setenv fb_x_res \"" + x_res +"\"");
             writer.println("setenv fb_y_res \"" + y_res +"\"");
             writer.println("setenv hdmi_phy_res \"" + mResolution +"\"\n");
+            writer.println("setenv rotation \"" + mDegree +"\"\n");
 
-            writer.println("setenv edid \"0\"\n");
-            writer.println("setenv hpd \"1\"\n");
+            writer.println("# Enable/Disable ODROID-VU7 Touchsreen");
+            writer.println("setenv disable_vu7 \"" + mDisablevu7.toString() +"\"\n");
+
+            writer.println("# invert touch screen x,y");
+            writer.println("setenv touch_invert_x \"" + mTouchInvertX.toString() +"\"");
+            writer.println("setenv touch_invert_y \"" + mTouchInvertY.toString() +"\"\n");
+
+            writer.println("setenv edid \"" + mEDID +"\"\n");
+            writer.println("setenv hpd \"" + mHPD +"\"\n");
             writer.println("setenv mmc_size_gb \"-1\"\n");
             writer.println("get_mmc_size 0\n");
             writer.println("setenv led_blink        \"1\"\n");
             writer.println("setenv bootcmd      \"movi read kernel 0 40008000;bootz 40008000\"\n");
-            writer.println("setenv bootargs     \"fb_x_res=${fb_x_res} fb_y_res=${fb_y_res} hdmi_phy_res=${hdmi_phy_res} edid=${edid} hpd=${hpd} led_blink=${led_blink} androidboot.mmc_size=${mmc_size_gb} androidboot.model=${board_name}\"");
+            writer.println("setenv bootargs     \"fb_x_res=${fb_x_res} fb_y_res=${fb_y_res} hdmi_phy_res=${hdmi_phy_res} disable_vu7=${disable_vu7} touch_invert_x=${touch_invert_x} touch_invert_y=${touch_invert_y} edid=${edid} hpd=${hpd} led_blink=${led_blink} androidboot.mmc_size=${mmc_size_gb} androidboot.model=${board_name} androidboot.rotation=${rotation}\"");
 
             writer.println("boot");
             writer.close();
