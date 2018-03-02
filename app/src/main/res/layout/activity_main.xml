@@ -258,6 +258,14 @@
                         android:layout_marginTop="22dp"
                         android:text="@string/disable_wlan_ps"
                         android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                    <Switch
+                        android:id="@+id/switch_no_usb_perms"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="22dp"
+                        android:text="@string/disable_usb_perms"
+                        android:textAppearance="?android:attr/textAppearanceMedium" />
                 </LinearLayout>
 
                <LinearLayout

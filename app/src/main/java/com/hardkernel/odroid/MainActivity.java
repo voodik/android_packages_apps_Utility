@@ -92,6 +92,7 @@ public class MainActivity extends Activity {
     private final static String FORCE_HDMI_INPUT_PROP = "persist.hdmi.switch_tv_input";
     private final static String ADB_OVER_NET_PROP = "persist.adb.tcp.port";
     private final static String WLAN_NO_PS_PROP = "persist.no_wlan_ps";
+    private final static String USB_NO_PERMS_PROP = "persist.disable_usb_perms";
     private final static String HDMI_ORIENTATION_PROP = "persist.demo.hdmirotation";
     private final static String SF_ROTATION_PROP = "ro.sf.hwrotation";
 
@@ -169,6 +170,7 @@ public class MainActivity extends Activity {
     private Switch mHdmiInputSwitch;
     private Switch mADBonSwitch;
     private Switch mWlanNoPsSwitch;
+    private Switch mNoUSBPermsSwitch;
     private Boolean mDisablevu7 = false;
     private Boolean mTouchInvertX = false;
     private Boolean mTouchInvertY = false;
@@ -774,7 +776,7 @@ public class MainActivity extends Activity {
 
             @Override
             public void onClick(View v) {
-			
+
 		    if (ipAndProxyFieldsAreValid()){
                         mEthernetManager.setConfiguration(
                 new IpConfiguration(mIpAssignment, mProxySettings,
@@ -797,6 +799,8 @@ public class MainActivity extends Activity {
         mADBonSwitch.setChecked((SystemProperties.getInt(ADB_OVER_NET_PROP, 0) > 0));
         mWlanNoPsSwitch = (Switch) findViewById(R.id.switch_wlan_no_ps);
         mWlanNoPsSwitch.setChecked(SystemProperties.getBoolean(WLAN_NO_PS_PROP, false));
+        mNoUSBPermsSwitch = (Switch) findViewById(R.id.switch_no_usb_perms);
+        mNoUSBPermsSwitch.setChecked(SystemProperties.getBoolean(USB_NO_PERMS_PROP, false));
 
         mBtSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
@@ -879,6 +883,18 @@ public class MainActivity extends Activity {
                     SystemProperties.set(WLAN_NO_PS_PROP, "true");
                 }else{
                     SystemProperties.set(WLAN_NO_PS_PROP, "false");
+                }
+            }
+        });
+        mNoUSBPermsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView,
+                                         boolean isChecked) {
+                if(isChecked){
+                    SystemProperties.set(USB_NO_PERMS_PROP, "true");
+                }else{
+                    SystemProperties.set(USB_NO_PERMS_PROP, "false");
                 }
             }
         });

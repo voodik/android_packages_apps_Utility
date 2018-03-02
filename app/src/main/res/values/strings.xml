@@ -81,4 +81,5 @@
     <string name="enable_bluetooth_sink_profile">Enable Bluetooth Sink profile</string>
     <string name="enable_adb_ower_network_at_boot">Enable ADB ower network at boot</string>
     <string name="disable_wlan_ps">Disable WiFi Power Saving</string>
+    <string name="disable_usb_perms">Disable USB permission dialogs</string>
 </resources>
