@@ -174,6 +174,7 @@ public class MainActivity extends Activity {
     private Boolean mDisablevu7 = false;
     private Boolean mTouchInvertX = false;
     private Boolean mTouchInvertY = false;
+    private Boolean mDisableDP = false;
     private int mEDID = 0;
     private int mHPD = 1;
 
@@ -370,6 +371,11 @@ public class MainActivity extends Activity {
                     if (line.startsWith("setenv touch_invert_y")){
                         if (line.contains("true")) {
                             mTouchInvertY = true;
+                        }
+                    }
+                    if (line.startsWith("setenv disable_dp")){
+                        if (line.contains("true")) {
+                            mDisableDP = true;
                         }
                     }
                     if (line.startsWith("setenv edid")){
@@ -1265,6 +1271,8 @@ public class MainActivity extends Activity {
             writer.println("# Enable/Disable ODROID-VU7 Touchsreen");
             writer.println("setenv disable_vu7 \"" + mDisablevu7.toString() +"\"\n");
 
+            writer.println("setenv disable_dp \"" + mDisableDP.toString() +"\"\n");
+
             writer.println("# invert touch screen x,y");
             writer.println("setenv touch_invert_x \"" + mTouchInvertX.toString() +"\"");
             writer.println("setenv touch_invert_y \"" + mTouchInvertY.toString() +"\"\n");
@@ -1275,7 +1283,7 @@ public class MainActivity extends Activity {
             writer.println("get_mmc_size 0\n");
             writer.println("setenv led_blink        \"1\"\n");
             writer.println("setenv bootcmd      \"movi read kernel 0 40008000;bootz 40008000\"\n");
-            writer.println("setenv bootargs     \"fb_x_res=${fb_x_res} fb_y_res=${fb_y_res} hdmi_phy_res=${hdmi_phy_res} disable_vu7=${disable_vu7} touch_invert_x=${touch_invert_x} touch_invert_y=${touch_invert_y} edid=${edid} hpd=${hpd} led_blink=${led_blink} androidboot.mmc_size=${mmc_size_gb} androidboot.model=${board_name} androidboot.rotation=${rotation}\"");
+            writer.println("setenv bootargs     \"fb_x_res=${fb_x_res} fb_y_res=${fb_y_res} hdmi_phy_res=${hdmi_phy_res} disable_vu7=${disable_vu7} disable_dp=${disable_dp} touch_invert_x=${touch_invert_x} touch_invert_y=${touch_invert_y} edid=${edid} hpd=${hpd} led_blink=${led_blink} androidboot.mmc_size=${mmc_size_gb} androidboot.model=${board_name} androidboot.rotation=${rotation}\"");
 
             writer.println("boot");
             writer.close();
