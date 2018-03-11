@@ -75,6 +75,7 @@
     <string name="shortcut_f9">F9</string>
     <string name="shortcut_f10">F10</string>
     <string name="enable_bluetooth">Enable Bluetooth</string>
+    <string name="enable_gps">Enable GPS</string>
     <string name="force_shutdown_without_dialog">Force shutdown without dialog</string>
     <string name="force_hdmi_audio_output">Force HDMI audio output</string>
     <string name="hdmi_cec_switch_tv_input_after_bootup">HDMI-CEC Switch TV input after bootup</string>

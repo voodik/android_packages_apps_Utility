@@ -86,6 +86,7 @@ public class MainActivity extends Activity {
     public final static String DRAM_FREQUENCY_NODE = "/sys/devices/platform/exynos5-devfreq-mif/devfreq/exynos5-devfreq-mif/max_freq";
     private final static String BOOT_INI = "/storage/0000-3333/boot.ini";
     private final static String BT_PROP = "persist.disable_bluetooth";
+    private final static String GPS_PROP = "persist.disable_location";
     private final static String BT_SINK_PROP = "persist.service.bt.a2dp.sink";
     private final static String SHUT_PROP = "persist.pwbtn.shutdown";
     private final static String FORCE_HDMI_AUDIO_PROP = "persist.hdmi.audioforce";
@@ -164,6 +165,7 @@ public class MainActivity extends Activity {
 
     private Switch mBtSwitch;
     private Switch mBtSinkSwitch;
+    private Switch mGPSSwitch;
     private Switch mShutSwitch;
     private Switch mHdmiAudioSwitch;
     private Switch mHdmiInputSwitch;
@@ -172,6 +174,7 @@ public class MainActivity extends Activity {
     private Boolean mDisablevu7 = false;
     private Boolean mTouchInvertX = false;
     private Boolean mTouchInvertY = false;
+    private Boolean mDisableDP = false;
     private int mEDID = 0;
     private int mHPD = 1;
 
@@ -368,6 +371,11 @@ public class MainActivity extends Activity {
                     if (line.startsWith("setenv touch_invert_y")){
                         if (line.contains("true")) {
                             mTouchInvertY = true;
+                        }
+                    }
+                    if (line.startsWith("setenv disable_dp")){
+                        if (line.contains("true")) {
+                            mDisableDP = true;
                         }
                     }
                     if (line.startsWith("setenv edid")){
@@ -768,13 +776,13 @@ public class MainActivity extends Activity {
             }
 
         });
-		
+
 		Button EthApply = (Button)findViewById(R.id.button_ethernet_apply);
         EthApply.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View v) {
-			
+
 		    if (ipAndProxyFieldsAreValid()){
                         mEthernetManager.setConfiguration(
                 new IpConfiguration(mIpAssignment, mProxySettings,
@@ -787,6 +795,8 @@ public class MainActivity extends Activity {
         mBtSwitch.setChecked(!SystemProperties.getBoolean(BT_PROP, true));
         mBtSinkSwitch = (Switch) findViewById(R.id.switch_bt_sink);
         mBtSinkSwitch.setChecked(SystemProperties.getBoolean(BT_SINK_PROP, true));
+        mGPSSwitch = (Switch) findViewById(R.id.switch_gps);
+        mGPSSwitch.setChecked(!SystemProperties.getBoolean(GPS_PROP, true));
         mShutSwitch = (Switch) findViewById(R.id.switch_shut);
         mShutSwitch.setChecked(SystemProperties.getBoolean(SHUT_PROP, false));
         mHdmiAudioSwitch = (Switch) findViewById(R.id.switch_hdmi_aud);
@@ -819,6 +829,18 @@ public class MainActivity extends Activity {
                     SystemProperties.set(BT_SINK_PROP, "true");
                 }else{
                     SystemProperties.set(BT_SINK_PROP, "false");
+                }
+            }
+        });
+        mGPSSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView,
+                                         boolean isChecked) {
+                if(isChecked){
+                    SystemProperties.set(GPS_PROP, "false");
+                }else{
+                    SystemProperties.set(GPS_PROP, "true");
                 }
             }
         });
@@ -1249,6 +1271,8 @@ public class MainActivity extends Activity {
             writer.println("# Enable/Disable ODROID-VU7 Touchsreen");
             writer.println("setenv disable_vu7 \"" + mDisablevu7.toString() +"\"\n");
 
+            writer.println("setenv disable_dp \"" + mDisableDP.toString() +"\"\n");
+
             writer.println("# invert touch screen x,y");
             writer.println("setenv touch_invert_x \"" + mTouchInvertX.toString() +"\"");
             writer.println("setenv touch_invert_y \"" + mTouchInvertY.toString() +"\"\n");
@@ -1259,7 +1283,7 @@ public class MainActivity extends Activity {
             writer.println("get_mmc_size 0\n");
             writer.println("setenv led_blink        \"1\"\n");
             writer.println("setenv bootcmd      \"movi read kernel 0 40008000;bootz 40008000\"\n");
-            writer.println("setenv bootargs     \"fb_x_res=${fb_x_res} fb_y_res=${fb_y_res} hdmi_phy_res=${hdmi_phy_res} disable_vu7=${disable_vu7} touch_invert_x=${touch_invert_x} touch_invert_y=${touch_invert_y} edid=${edid} hpd=${hpd} led_blink=${led_blink} androidboot.mmc_size=${mmc_size_gb} androidboot.model=${board_name} androidboot.rotation=${rotation}\"");
+            writer.println("setenv bootargs     \"fb_x_res=${fb_x_res} fb_y_res=${fb_y_res} hdmi_phy_res=${hdmi_phy_res} disable_vu7=${disable_vu7} disable_dp=${disable_dp} touch_invert_x=${touch_invert_x} touch_invert_y=${touch_invert_y} edid=${edid} hpd=${hpd} led_blink=${led_blink} androidboot.mmc_size=${mmc_size_gb} androidboot.model=${board_name} androidboot.rotation=${rotation}\"");
 
             writer.println("boot");
             writer.close();
