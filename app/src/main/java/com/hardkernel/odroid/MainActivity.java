@@ -1141,6 +1141,12 @@ public class MainActivity extends Activity {
             } else if ("1920x1200p60hz".equals(mResolution)) {
                 x_res = "1920";
                 y_res = "1200";
+            } else if ("1200x1920p60hz".equals(mResolution)) {
+                x_res = "1200";
+                y_res = "1920";
+            } else if ("720x1280p61hz".equals(mResolution)) {
+                x_res = "720";
+                y_res = "1280";
             }
 
             writer.println("# setenv fb_x_res \"640\"");
